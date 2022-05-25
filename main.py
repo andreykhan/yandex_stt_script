@@ -1,35 +1,43 @@
 import requests
-from requests.auth import HTTPBasicAuth
-import os
 
-API_KEY="AQVN1uK7XHxgyMOZC2dHbKq2FpNS0X3fza1mMREy"
+API_KEY = "AQVN0RC-Sn8nnMaNvJMGZQNOmXvthz1SSNd4aiMM"
 URL = 'https://transcribe.api.cloud.yandex.net/speech/stt/v2/longRunningRecognize'
 headers = {
     'Accept': 'application/json',
-    'Api-Key': API_KEY
+    'Authorization': f'Api-Key {API_KEY}'
 }
-auth = HTTPBasicAuth('apikey', 'AQVN1uK7XHxgyMOZC2dHbKq2FpNS0X3fza1mMREy')
-#auth = {"apikey": "API_KEY"}
+
 data = {
     "config": {
         "specification": {
             "languageCode": "ru-RU",
             "model": "general",
             "profanityFilter": "false",
-            "audioEncoding": "LINEAR16_PCM",
+            "audioEncoding": "MP3",
             "sampleRateHertz": "48000",
-            "audioChannelCount": "5"
+            "audioChannelCount": "1"
         }
     },
     "audio": {
-        "uri": "https://storage.yandexcloud.net/andreykhanbacket/2021-02-19_17-33_77084597488_incoming.mp3"
+        "uri": "https://storage.yandexcloud.net/andreykhanbacket/2021-12-23_17-49_77089494952_incoming.mp3"
     }
 }
 
 
 def push_audio():
-    req = requests.post(URL, headers=headers, auth=auth, json=data)
+    req = requests.post(URL, headers=headers, json=data)
     print(req)
     print(req.text)
+    operationId = req.json()['id']
+    print(operationId)
 
-push_audio()
+
+def get_result():
+    result = requests.get('https://operation.api.cloud.yandex.net/operations/e03ohorfc4c3i4cefldi', headers=headers)
+    print(result)
+    #print(result.json())
+    print(result.json()['response']['chunks'])
+
+
+#push_audio()
+get_result()
