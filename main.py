@@ -1,43 +1,49 @@
 import requests
+import os
+import time
+import pathlib
 
+results = tuple()
 API_KEY = "AQVN0RC-Sn8nnMaNvJMGZQNOmXvthz1SSNd4aiMM"
 URL = 'https://transcribe.api.cloud.yandex.net/speech/stt/v2/longRunningRecognize'
 headers = {
-    'Accept': 'application/json',
-    'Authorization': f'Api-Key {API_KEY}'
-}
-
-data = {
-    "config": {
-        "specification": {
-            "languageCode": "ru-RU",
-            "model": "general",
-            "profanityFilter": "false",
-            "audioEncoding": "MP3",
-            "sampleRateHertz": "48000",
-            "audioChannelCount": "1"
-        }
-    },
-    "audio": {
-        "uri": "https://storage.yandexcloud.net/andreykhanbacket/2021-12-23_17-49_77089494952_incoming.mp3"
+        'Accept': 'application/json',
+        'Authorization': f'Api-Key {API_KEY}'
     }
-}
+for audio_name in os.listdir(path='C:\dev\calls'):
+    data = {
+        "config": {
+            "specification": {
+                "languageCode": "ru-RU",
+                "model": "general",
+                "profanityFilter": "false",
+                "audioEncoding": "MP3",
+                "sampleRateHertz": "48000",
+                "audioChannelCount": "1"
+            }
+        },
+        "audio": {
+            "uri": 'https://storage.yandexcloud.net/andreykhanbacket/'+audio_name
+        }
+    }
 
-
-def push_audio():
     req = requests.post(URL, headers=headers, json=data)
-    print(req)
-    print(req.text)
-    operationId = req.json()['id']
-    print(operationId)
+    print((req.json()['id']))
+    print(f"{audio_name} was successfully submitted for transcription")
+    results = results + ((req.json()['id']),)
+    print(results)
 
 
-def get_result():
-    result = requests.get('https://operation.api.cloud.yandex.net/operations/e03ohorfc4c3i4cefldi', headers=headers)
-    print(result)
-    #print(result.json())
-    print(result.json()['response']['chunks'])
+for audio_id in results:
+    result_req = requests.get('https://operation.api.cloud.yandex.net/operations/'+audio_id, headers=headers)
+    try:
+        y = (result_req.json()['response']['chunks'][0]['alternatives'][0]['text'])
+        print(y)
+        with open(pathlib.Path('C:/') / 'dev' / 'call_results' / 'results.txt', 'a', encoding="utf-8") as f:
+            f.write(y)
+            f.write("\n")
+        f.close()
 
+    except KeyError:
+        time.sleep(10)
 
-#push_audio()
-get_result()
