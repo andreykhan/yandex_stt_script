@@ -5,7 +5,8 @@ import pathlib
 
 results = tuple()
 API_KEY = "AQVN0RC-Sn8nnMaNvJMGZQNOmXvthz1SSNd4aiMM"
-URL = 'https://transcribe.api.cloud.yandex.net/speech/stt/v2/longRunningRecognize'
+POST_URL = 'https://transcribe.api.cloud.yandex.net/speech/stt/v2/longRunningRecognize'
+GET_URL = 'https://operation.api.cloud.yandex.net/operations/'
 headers = {
         'Accept': 'application/json',
         'Authorization': f'Api-Key {API_KEY}'
@@ -27,7 +28,7 @@ for audio_name in os.listdir(path='C:\dev\calls_test'):
         }
     }
 
-    req = requests.post(URL, headers=headers, json=data)
+    req = requests.post(POST_URL, headers=headers, json=data)
     print((req.json()['id']))
     print(f"{audio_name} was successfully submitted for transcription")
     results = results + ((req.json()['id']),)
@@ -35,7 +36,7 @@ for audio_name in os.listdir(path='C:\dev\calls_test'):
 
 
 for audio_id in results:
-    while requests.get('https://operation.api.cloud.yandex.net/operations/'+audio_id, headers=headers).json()['done'] \
+    while requests.get(GET_URL+audio_id, headers=headers).json()['done'] \
             is False:
         time.sleep(1)
     result_req = requests.get('https://operation.api.cloud.yandex.net/operations/'+audio_id, headers=headers)
