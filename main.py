@@ -10,7 +10,7 @@ headers = {
         'Accept': 'application/json',
         'Authorization': f'Api-Key {API_KEY}'
     }
-for audio_name in os.listdir(path='C:\dev\calls'):
+for audio_name in os.listdir(path='C:\dev\calls_test'):
     data = {
         "config": {
             "specification": {
@@ -35,15 +35,13 @@ for audio_name in os.listdir(path='C:\dev\calls'):
 
 
 for audio_id in results:
+    while requests.get('https://operation.api.cloud.yandex.net/operations/'+audio_id, headers=headers).json()['done'] \
+            is False:
+        time.sleep(1)
     result_req = requests.get('https://operation.api.cloud.yandex.net/operations/'+audio_id, headers=headers)
-    try:
-        y = (result_req.json()['response']['chunks'][0]['alternatives'][0]['text'])
-        print(y)
-        with open(pathlib.Path('C:/') / 'dev' / 'call_results' / 'results.txt', 'a', encoding="utf-8") as f:
-            f.write(y)
-            f.write("\n")
-        f.close()
-
-    except KeyError:
-        time.sleep(10)
-
+    y = (result_req.json()['response']['chunks'][0]['alternatives'][0]['text'])
+    print(y)
+    with open(pathlib.Path('C:/') / 'dev' / 'call_results' / 'results.txt', 'a', encoding="utf-8") as f:
+        f.write(y)
+        f.write("\n")
+    f.close()
